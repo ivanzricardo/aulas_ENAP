@@ -38,10 +38,58 @@ write_rds(juizes_drogas_CL,
 
 # Faça commit e push do script e do arquivo `.rds` ----
 
+#
+dec_gather <- decisoes %>% 
+  filter(!is.na(id_decisao)) %>% 
+  select(id_decisao:data_registro) %>% 
+  # 1. nome da coluna que vai guardar os nomes de colunas empilhadas
+  # 2. nome da coluna que vai guardar os valores das colunas
+  # 3. seleção das colunas a serem empilhadas
+  gather(key="variavel", value="valor", -id_decisao) %>% 
+  arrange(id_decisao)
 
+
+decisoes_peq <- decisoes %>%
+  head(2)
+
+dec_gather_peq <- decisoes_peq %>% 
+  filter(!is.na(id_decisao)) %>% 
+  select(id_decisao:data_registro) %>% 
+  # 1. nome da coluna que vai guardar os nomes de colunas empilhadas
+  # 2. nome da coluna que vai guardar os valores das colunas
+  # 3. seleção das colunas a serem empilhadas
+  gather(key="variavel", value="valor", -id_decisao) %>% 
+  arrange(id_decisao)
+
+levels(factor(dec_gather$variavel))
+
+decisoes_spread <- decisoes %>% 
+  filter(!is.na(id_decisao)) %>% 
+  select(id_decisao:data_registro) %>% 
+  gather(key, value, -id_decisao) %>%
+  
+  # 1. coluna a ser espalhada
+  # 2. valores da coluna
+  spread(key, value)
 
 # Qual juiz julga a maior proporção de processos que tratam de drogas ----
 
+juiz_droga <- decisoes %>% 
+  filter(!is.na(txt_decisao)) %>%
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+                            "droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na"),
+         droga=case_when(
+           droga==TRUE ~ "droga",
+           droga==FALSE ~ "n_droga"
+         )) %>%
+  group_by(juiz,droga) %>%
+  summarise(n=n()) %>%
+  spread(droga,n,fill = 0) %>%
+  mutate(total=droga+n_droga,
+         proporcao=droga/total) %>%
+  arrange(desc(proporcao))
+  
 
 # Crie um objeto contendo informações sobre os tamanhos das bancadas dos ----
 # partidos (arquivo `bancadas.rds`), suas respectivas coligações 
