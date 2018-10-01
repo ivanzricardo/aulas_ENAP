@@ -1,0 +1,294 @@
+---
+title: "Estruturas de dados"
+author: "Frederico Bertholini"
+subtitle: Aula 04
+output:
+  beamer_presentation: default
+  ioslides_presentation: 
+    widescreen: yes
+---
+
+
+```{r,eval=T,include=F}
+
+lista.de.pacotes = c("tidyverse","lubridate","janitor","readxl","stringr","repmis") # escreva a lista de pacotes
+novos.pacotes <- lista.de.pacotes[!(lista.de.pacotes %in%
+                                      installed.packages()[,"Package"])]
+if(length(novos.pacotes) > 0) {install.packages(novos.pacotes)}
+lapply(lista.de.pacotes, require, character.only=T)
+rm(lista.de.pacotes,novos.pacotes)
+gc()
+
+knitr::opts_knit$set(root.dir = "/Volumes/Macintosh HD/OneDrive/ENAP/aulas_ENAP")
+
+```
+
+
+## Vamos versionar nossos projetos a partir de agora
+
+- Versionamento -> <https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/>
+
+
+## Exercitando o que sabemos até aqui
+
+- Carregue o arquivo `decisoes.rds` em um objeto chamado `decisoes`.
+
+- Crie um objeto contendo o tempo médio entre decisão e registro por juiz, apenas para processos relacionados a drogas nos municípios de Campinas ou Limeira.
+
+ -- Obs.: a nova "singularidade" da base de dados será o `juiz`. Na base original, a singularidade era o `processo`
+
+- Salve o objeto resultante em um arquivo chamado `juizes_drogas_CL.rds`.
+
+
+## Resolução
+
+- Carregando
+```{r,echo=T}
+#setwd()
+decisoes <- read_rds("CADS2018/Exercícios/dados/decisoes.rds")
+
+```
+
+## Resolução
+
+- tempo médio entre decisão e registro, por juiz, para processos relacionados a drogas nos municípios de Campinas ou Limeira
+```{r}
+juizes_drogas_CL <- decisoes %>% 
+  # selecionando as colunas utilizadas (só pra usar o select)
+  select(juiz,municipio,txt_decisao,data_registro,data_decisao) %>%
+  # criando variável "droga" a partir do texto da decisão
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+    "droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na"),
+  # variável tempo, 
+         tempo = dmy(data_registro) - dmy(data_decisao)) %>% 
+  filter(droga ==TRUE,municipio %in% c("Campinas","Limeira")) %>%
+  group_by(juiz) %>%
+  summarise(tempo_medio = mean(tempo,na.rm=T))
+  
+```
+
+## Resolução
+
+- Salvando o objeto `juizes_drogas_CL.rds`
+```{r}
+write_rds(juizes_drogas_CL,"juizes_drogas_CL.rds")
+```
+
+
+
+## Exercitando o versionamento
+
+- Faça commit e push do script e do arquivo `.rds`
+
+# tydyr
+
+
+## Alterando o formato de dados
+Até agora, estudamos os principais ferramentas de transformação de dados do `dplyr`. Agora vamos aumentar nosso toolkit com `tidyr`
+
+
+- Vamos utilizar uma nova base de dados, que completa a de decisões.
+
+```{r echo=TRUE}
+processos <- read_rds("CADS2018/Exercícios/dados/processos_nested.rds")
+```
+
+
+## Fomato tidy
+
+- Hadley Wickham <http://r4ds.had.co.nz/tidy-data.html>
+
+## Funções do pacote
+
+
+- Enquanto o `dplyr` faz recortes na base (com `filter()`e `select()`) e adições simples (`mutate()`, `summarise()`), o `tidyr` mexe no **formato** da tabela (`gather()`, `spread()`) e faz modificações menos triviais.
+
+
+- As funções do `tidyr` geralmente vêm em pares com seus inversos:
+    - `gather()` e `spread()`,
+    - `nest()` e `unnest()`,
+    - `separate()` e `unite()`
+
+
+## Onde estamos
+
+
+<http://r4ds.had.co.nz/wrangle-intro.html>
+
+```{r, out.width="90%", echo=FALSE, fig.align='center',eval=F}
+knitr::include_graphics("CADS2018/Slides/imgs/wrangle.png")
+```
+
+
+## `gather()` 
+
+- `gather()` empilha o banco de dados
+
+
+```{r, warning=FALSE, message=FALSE}
+decisoes %>% 
+  filter(!is.na(id_decisao)) %>% 
+  select(id_decisao:data_registro) %>% 
+  # 1. nome da coluna que vai guardar os nomes de colunas empilhadas
+  # 2. nome da coluna que vai guardar os valores das colunas
+  # 3. seleção das colunas a serem empilhadas
+  gather(key="variavel", value="valor", -id_decisao) %>% 
+  arrange(id_decisao)
+```
+
+
+
+## `spread()`
+
+- `spread()` espalha uma variável nas colunas e preenche com outra variável
+
+- É essencialmente a função inversa de `gather`
+
+```{r}
+decisoes %>% 
+  filter(!is.na(id_decisao)) %>% 
+  select(id_decisao:data_registro) %>% 
+  gather(key, value, -id_decisao) %>% 
+  # 1. coluna a ser espalhada
+  # 2. valores da coluna
+  spread(key, value)
+```
+
+
+## Exercício
+
+- Qual juiz julga a maior proporção de processos que tratam de drogas
+
+ -- Dica: construa um `data.frame` contendo as colunas juiz, n_processos_drogas, n_processos_n_drogas e total_processos, remodelando os dados para haver um juiz por linha e utilizando `spead()`
+    
+## Resolução
+
+```{r,echo=F}
+decisoes %>% 
+  filter(!is.na(txt_decisao)) %>%
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+    "droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na"),
+    droga=case_when(
+      droga==TRUE ~ "droga",
+      droga==FALSE ~ "n_droga"
+    )) %>%
+  group_by(juiz,droga) %>%
+  summarise(n=n()) %>%
+  spread(droga,n,fill = 0) %>%
+  mutate(total=droga+n_droga,
+         proporcao=droga/total)
+  
+  
+```
+
+
+## Unindo e separando colunas
+
+- `unite` junta duas ou mais colunas usando algum separador (`_`, por exemplo).
+- `separate` faz o inverso de `unite`, e uma coluna em várias usando um separador.
+
+## 
+```{r}
+decisoes %>% 
+  select(n_processo, classe_assunto) %>% 
+  separate(classe_assunto, c('classe', 'assunto'), sep = ' / ', 
+           extra = 'merge', fill = 'right') %>% 
+  count(assunto, sort = TRUE)
+```
+
+
+
+## List columns: `nest()` e `unnest()`
+
+`nest()` e `unnest()` são operações inversas e servem para tratar dados complexos, como o que temos em `processos`
+
+```{r}
+d_partes <- processos %>% 
+  select(n_processo, partes) %>% 
+  unnest(partes)
+```
+
+## 
+
+As list columns são uma forma condensada de guardar dados que estariam em múltiplas tabelas. Por exemplo, uma alternativa à colocar as `partes` numa list column seria guardar a tabela `d_partes` separadamente.
+
+```{r}
+
+glimpse(d_partes)
+```
+
+
+## Duplicatas
+
+Para retirar duplicatas, utilizar `distinct`. Ele considera apenas a primeira linha em que encontra um padrão para as combinações de variáveis escolhidas e descarta as demais.
+
+```{r echo=TRUE}
+decisoes %>% 
+  distinct(municipio)
+```
+
+## Por coluna
+
+Para manter as demais colunas, use `.keep_all=`:
+
+```{r echo=TRUE}
+decisoes %>%
+  distinct(municipio, camara, 
+           .keep_all = TRUE)
+```
+
+## `janitor::get_dupes()`
+
+Use `janitor::get_dupes()` para averiguar os casos em que há repetição de combinações de colunas.
+
+```{r echo=TRUE}
+decisoes %>% 
+  get_dupes(n_processo)
+```
+
+
+# Joins
+
+## Dados relacionais
+
+- Hadley Wickham <http://r4ds.had.co.nz/relational-data.html>
+
+## Principais funções 
+
+Para juntar tabelas, usar `inner_join`, `left_join`, `anti_join`, etc. 
+
+## Visualizando
+
+```{r, out.width="90%", echo=FALSE, fig.align='center',eval=F}
+knitr::include_graphics("CADS2018/Slides/imgs/join-venn.png")
+```
+
+
+
+## Exemplo de inner join:
+
+```{r echo=TRUE}
+decisoes %>% 
+  filter(data_registro == "18/01/2018", !is.na(id_decisao)) %>% 
+  select(id_decisao, n_processo) %>% 
+  inner_join(processos, "n_processo")
+```
+
+
+## Exemplo de right join:
+
+
+```{r echo=TRUE}
+decisoes %>% 
+  filter(data_registro == "18/01/2018", !is.na(id_decisao)) %>% 
+  select(id_decisao, n_processo) %>% 
+  right_join(processos, "n_processo")
+```
+
+## Exercício
+
+- Crie um objeto contendo informações sobre os tamanhos das bancadas dos partidos (arquivo `bancadas.rds`), suas respectivas coligações eleitorais para 2018 (arquivo `coligacoes.xlsx`) e o grau de concordância com a agenda do Gov Temer (arquivo `governismo_temer.xlsx`). 
+
+- Bônus: use `group_by` e `summarise` para identificar qual candidato tem a coligação com menor média de concordância e qual candidato tem a maior proporção total de assentos.
