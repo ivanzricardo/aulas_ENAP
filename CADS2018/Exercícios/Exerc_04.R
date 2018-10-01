@@ -35,6 +35,7 @@ juizes_drogas_CL <- decisoes %>%
 write_rds(juizes_drogas_CL,
           "C:/Users/Aluno/Desktop/git/aulas_ENAP/CADS2018/Exercícios/dados/juizes_drogas_CL.rds")
 
+
 # Faça commit e push do script e do arquivo `.rds` ----
 
 
