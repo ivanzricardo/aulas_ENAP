@@ -1,0 +1,502 @@
+---
+title: "Pacotes tidyverse"
+author: "Frederico Bertholini"
+subtitle: Aula 02
+output:
+  beamer_presentation: default
+  ioslides_presentation: 
+    widescreen: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+#setwd("/Volumes/Macintosh HD/OneDrive/ENAP")
+options(width=200)
+library(readr)
+library(readxl)
+```
+
+
+# O Universo tidyverse
+
+
+## Manifesto tidyverse
+
+
+O tidyverse, também chamado por muitos de hadleyverse, é um conjunto de pacotes que, por compartilharem esses princípios do manifesto tidy, podem ser utilizados naturalmente em conjunto. Pode-se dizer que existe o R antes do tidyverse e o R depois do tidyverse. 
+
+Os princípios fundamentais do tidyverse são:
+
+- Reutilizar estruturas de dados existentes.
+
+- Organizar funções simples usando o pipe.
+
+- Aderir à programação funcional.
+
+- Projetado para ser usado por seres humanos.
+
+
+## Manifesto tidy
+
+- Tidy Tools Manifesto <https://cran.r-project.org/web/packages/tidyverse/vignettes/manifesto.html>
+
+- Tidy data vignette <https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html>
+
+- Tidy Data paper <http://vita.had.co.nz/papers/tidy-data.pdf>
+
+- Conjunto de pacotes <https://www.tidyverse.org/packages/>
+
+
+## Usando o pipe - O operador %>%
+
+O operador %>% (pipe) foi uma das grandes revoluções recentes do R, tornando a leitura de códigos mais lógica, fácil e compreensível. 
+
+```{r,message=F,warning=F}
+library(tidyverse)
+library(magrittr)
+```
+
+
+## Ideia
+
+A ideia do operador %>% (pipe) é bem simples: usar o valor resultante da expressão do lado esquerdo como primeiro argumento da função do lado direito.
+
+- As duas linhas abaixo são equivalentes.
+
+```{r,eval=F}
+f(x, y)
+```
+
+```{r,eval=F}
+x %>% f(y)
+```
+
+## E se aumentarmos o código?
+
+Vamos calcular a raiz quadrada da soma dos valores de 1 a 4. `r x <- c(1, 2, 3, 4)`
+
+Primeiro, sem o pipe.
+```{r}
+sqrt(sum(x))
+```
+
+
+Agora com o pipe.
+```{r}
+x %>% 
+  sum %>% 
+  sqrt
+```
+
+
+## E se realmente tivermos muitas funções aninhadas?
+
+A utilização do pipe transforma um código confuso e difícil de ser lido em algo *simples e intuitivo*.
+
+
+## Receita de bolo - sem pipe
+
+Tente entender o que é preciso fazer. 
+
+```{r, eval=FALSE}
+esfrie(
+  asse(
+    coloque(
+      bata(
+        acrescente(
+          recipiente(rep("farinha", 2), "água", 
+                     "fermento", "leite", "óleo"), 
+          "farinha", até = "macio"), 
+        duração = "3min"), 
+      lugar = "forma", tipo = "grande", 
+      untada = TRUE), duração = "50min"), 
+  "geladeira", "20min")
+```
+
+## Receita de bolo - com pipe
+
+Desistiu? Agora veja como fica escrevendo com o `%>%`:
+
+```{r, eval=FALSE}
+
+recipiente(rep("farinha", 2), "água", "fermento", "leite", "óleo") %>%
+  acrescente("farinha", até = "macio") %>%
+  bata(duração = "3min") %>%
+  coloque(lugar = "forma", tipo = "grande", untada = TRUE) %>%
+  asse(duração = "50min") %>%
+  esfrie("geladeira", "20min")
+
+```
+
+
+# Exercícios pipe
+
+## Exercício
+
+1. Reescreva a expressão abaixo utilizando o %>%.
+
+```{r, eval=F}
+round(mean(divide_by(sum(1:10),3)),digits = 1)
+```
+
+## Resolução
+
+## Exercício
+
+```{r, eval=F}
+2 %>% 
+  add(2) %>% 
+  c(6, NA) %>% 
+  mean(na.rm = T) %>% 
+  equals(5)
+```
+
+
+## Resolução
+
+# Importação no tidyverse
+
+## Importação com `readr`, `readxl`, `haven` e `DBI`
+
+
+No tidyverse, geralmente
+
+- Funções `read_<formato>` servem para ler um arquivo no formato `<formato>`
+- Funções `write_<formato>` servem para escrever num arquivo com o formato `<formato>`
+
+
+## Arquivos de texto
+
+- `csv`, `tsv`, `txt`, ...
+
+- Para esses aqui, usar o pacote `readr`
+- Você também pode experimentar o `data.table::fread`
+
+
+## 'readr' para textos
+
+Exemplo:
+
+```{r, eval=F}
+read_csv("data/import/mtcars.csv")
+
+data.table::fread("data/import/mtcars.csv")
+```
+
+## Arquivos binários
+
+- `.RData`, `.rds`, `.feather`, `.fst`
+- `.dta` (Stata), `.sas7bdat` (SAS), `.sav` (SPSS)
+
+- Ler com `readr`, `haven`, `feather`, `fst`.
+
+Exemplo:
+
+```{r, eval=F}
+read_rds("data/import/mtcars.rds")
+```
+
+## Bancos de dados
+
+- `MySQL`, `SQL Server`, `PostgreSQL`, `SQLite`, ...
+- `Spark`, `MongoDB`, `Hive`, ...
+
+- Utilizar pacotes `DBI` e `odbc`
+
+
+
+
+# Pacotes `dplyr` e `tidyr`
+
+## Conjunto de dados
+
+Vamos trabalhar com a base `decisoes`, que contém decisões do Tribunal de Justiça de São Paulo
+
+```{r}
+decisoes <- read_rds("CADS2018/Exercícios/dados/decisoes.rds")
+glimpse(decisoes)
+```
+
+
+## Características do `dplyr`
+
+
+- A utilização é facilitada com o emprego do operador `%>%`
+
+
+- No primeiro argumento colocamos o `data.frame` ou o `tibble`, e nos outros argumentos colocamos o que queremos fazer.
+
+
+## As cinco funções principais do `dplyr`
+
+- `select`: selecionar colunas
+
+- `filter`: filtrar linhas
+
+- `mutate`: criar colunas
+
+- `summarise`: sumarizar colunas
+
+- `arrange`: ordenar linhas
+
+# select
+
+## `select`
+
+- Utilizar `starts_with(x)`, `contains(x)`, `matches(x)`, `one_of(x)`, etc.
+- Possível colocar nomes, índices, e intervalos de variáveis com `:`.
+
+## Em ação
+
+```{r}
+decisoes %>% 
+  select(id_decisao, n_processo, municipio, juiz)
+```
+
+## Em ação
+
+```{r}
+decisoes %>% 
+  select(classe_assunto:id_decisao, juiz)
+```
+
+## Em ação
+
+```{r}
+decisoes %>% 
+  select(id_decisao, starts_with('data_'))
+```
+
+
+
+## Exercício 
+- selecione as colunas que acabam com "cisao".
+
+## Resolução
+```{r}
+decisoes %>% 
+  select(ends_with("cisao"))
+```
+
+## Exercício 
+- tire as colunas de texto = 'txt_decisao' e classe/assunto = 'classe_assunto'.
+    - Dica: veja os exemplos de `?select` em `Drop variables ...`
+
+## Resolução
+```{r}
+decisoes %>% 
+  select(-classe_assunto, -txt_decisao)
+```
+
+# filter
+
+## `filter`
+
+- Use `,` ou `&` para "e" e `|` para "ou".
+- Condições separadas por vírgulas é o mesmo que separar por `&`.
+
+## `filter` em ação
+
+```{r}
+decisoes %>% 
+  select(n_processo, id_decisao, municipio, juiz) %>% 
+  filter(municipio == 'São Paulo')
+```
+
+## Dica: usar `%in%`
+```{r, echo=T,warning=F,message=F}
+library(lubridate) # para trabalhar com as datas
+#`day(dmy(data_decisao))` pega o dia da decisão. 
+```
+
+```{r}
+decisoes %>% 
+  select(id_decisao, municipio, data_decisao, juiz) %>% 
+  # municipio igual a campinas ou jaú, OU dia da decisão maior ou igual a 25
+  filter(municipio %in% c('Campinas', 'Jaú') | day(dmy(data_decisao)) >= 25)
+```
+
+
+
+## Mais ação
+
+```{r, eval=T}
+decisoes %>% 
+  select(juiz) %>% 
+  # filtra juízes que têm `Z` ou `z` no nome
+  filter(str_detect(juiz, regex("z", ignore_case = TRUE))) %>% 
+  # conta e ordena os juizes em ordem decrescente
+  count(juiz, sort = TRUE) %>%
+  head(5)
+```
+
+## **Obs** 
+
+A função `str_detect()` retorna `TRUE` se um elemento do vetor de textos é compatível com uma *expressão regular*. Estudaremos o pacote `stringr` e as funções `str_*` em outra aula.
+
+
+## Exercício 
+
+- filtre apenas casos em que `id_decisao` não é `NA`
+
+## Resolução
+
+```{r}
+decisoes %>% 
+  filter(is.na(id_decisao))
+```
+
+
+## Exercício
+
+- filtre todas as decisões de 2018.
+
+  -- Dica: função `lubridate::year()`
+
+## Resolução
+
+```{r}
+decisoes %>% 
+  filter(year(dmy(data_decisao)) == 2018)
+```
+
+# mutate
+
+## `mutate`
+
+- Aceita várias novas colunas iterativamente.
+
+- Novas variáveis devem ter o mesmo `length` que o `nrow` do bd original ou `1`.
+
+## `mutate` em ação
+```{r}
+decisoes %>% 
+  select(n_processo, data_decisao, data_registro) %>% 
+  mutate(tempo = dmy(data_registro) - dmy(data_decisao))
+```
+
+## Exercício 
+
+- Crie uma coluna binária `drogas` que vale `TRUE` se no texto da decisão algo é falado de drogas e `FALSE` caso contrário. 
+ -- Dica: `str_detect`
+
+Obs.: Considere tanto a palavra 'droga' como seus sinônimos, ou algum exemplo de droga e retire os casos em que `txt_decisao` é vazio
+
+## Resolução 
+
+```{r }
+decisoes %>% 
+  filter(!is.na(txt_decisao)) %>% 
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+    "droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na")) %>%
+  dplyr::select(n_processo,droga) 
+  
+```
+
+# summarise
+
+## `summarise`
+
+- Retorna um vetor de tamanho `1` a partir de uma operação com as variáveis (aplicação de uma função).
+- Geralmente é utilizado em conjunto com `group_by()`.
+- Algumas funções importantes: `n()`, `n_distinct()`.
+
+## Em ação
+
+```{r,eval=F}
+decisoes %>% 
+  select(n_processo, municipio, data_decisao) %>%
+  #        pega ano da decisão
+  mutate(ano_julgamento = year(dmy(data_decisao)),
+         # pega o ano do processo 0057003-20.2017.8.26.0000" -> "2017"
+         ano_proc = str_sub(n_processo, 12, 15),
+         # transforma o ano em inteiro
+         ano_proc = as.numeric(ano_proc),
+         # calcula o tempo em anos
+         tempo_anos = ano_julgamento - ano_proc) %>% 
+  group_by(municipio) %>% 
+  summarise(n = n(),
+            media_anos = mean(tempo_anos),
+            min_anos = min(tempo_anos),
+            max_anos = max(tempo_anos)) 
+```
+
+## Resultado
+
+
+```{r,echo=F}
+decisoes %>% 
+  select(n_processo, municipio, data_decisao) %>%
+  #        pega ano da decisão
+  mutate(ano_julgamento = year(dmy(data_decisao)),
+         # pega o ano do processo 0057003-20.2017.8.26.0000" -> "2017"
+         ano_proc = str_sub(n_processo, 12, 15),
+         # transforma o ano em inteiro
+         ano_proc = as.numeric(ano_proc),
+         # calcula o tempo em anos
+         tempo_anos = ano_julgamento - ano_proc) %>% 
+  group_by(municipio) %>% 
+  summarise(n = n(),
+            media_anos = mean(tempo_anos),
+            min_anos = min(tempo_anos),
+            max_anos = max(tempo_anos)) 
+```
+
+
+## usando `count()`
+
+A função `count()`, simplifica um `group_by %>% summarise %>% ungroup`:
+
+```{r}
+decisoes %>% 
+  count(juiz, sort = TRUE) %>% 
+  mutate(prop = n / sum(n), 
+         prop = scales::percent(prop))
+```
+
+
+## + fácil ainda
+
+mas sem formato %
+
+```{r}
+decisoes %>% 
+  count(juiz, sort = TRUE) %>% 
+  mutate(prop = prop.table(n))
+```
+
+
+# arrange
+
+## `arrange`
+
+- Simplesmente ordena de acordo com as opções.
+
+- Utilizar `desc()` para ordem decrescente ou o sinal de menos (`-`).
+
+## Exercício 
+
+- Quem são os cinco relatores mais prolixos?
+
+ -- Dica: use `str_length()`
+ -- Lembre-se da função `head()`
+
+## Resolução
+
+```{r}
+decisoes %>% 
+  filter(!is.na(txt_decisao)) %>% 
+  mutate(tamanho = str_length(txt_decisao)) %>% 
+  group_by(juiz) %>% 
+  summarise(n = n(), 
+            tamanho_mediana = median(tamanho)) %>% 
+  filter(n >= 10) %>% 
+  arrange(desc(tamanho_mediana)) %>%
+  head()
+
+
+```
+
+
+

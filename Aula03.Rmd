@@ -1,0 +1,54 @@
+---
+title: "Versionamento e manipulação"
+author: "Frederico Bertholini"
+subtitle: Aula 03
+output:
+  beamer_presentation: default
+  ioslides_presentation: 
+    widescreen: yes
+---
+
+## Macetinho a pedidos
+
+```{r,eval=F}
+
+lista.de.pacotes = c("tidyverse","lubridate") # escreva a lista de pacotes
+novos.pacotes <- lista.de.pacotes[!(lista.de.pacotes %in%
+                                      installed.packages()[,"Package"])]
+if(length(novos.pacotes) > 0) {install.packages(novos.pacotes)}
+lapply(lista.de.pacotes, require, character.only=T)
+rm(lista.de.pacotes,novos.pacotes)
+gc()
+```
+
+
+## Recapitulando aula passada
+
+- `select`
+
+- `filter`
+
+- `mutate`
+
+- `summarise`
+
+- `arrange`
+
+## Tópicos específicos
+
+- `case_when`
+
+- `mutate_if` e `mutate_at`
+
+
+
+## Algum código
+
+- Trabalho sobre uso sustentável da água <https://raw.githubusercontent.com/codeplanprojetos/156_sustentavel/master/carga_dados_sustentavel.R?token=AM5A-gfeFo5T-xkH59EPFaCiINYGI1LZks5bteKcwA%3D%3D>
+
+
+## Vamos versionar nossos projetos a partir de agora
+
+- Versionamento -> <https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/>
+
+

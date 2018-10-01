@@ -1,0 +1,49 @@
+---
+title: "Estruturas de dados"
+author: "Frederico Bertholini"
+subtitle: Aula 04
+output:
+  beamer_presentation: default
+  ioslides_presentation: 
+    widescreen: yes
+---
+
+
+```{r,eval=T,include=F}
+
+lista.de.pacotes = c("tidyverse","lubridate","janitor","readxl","stringr") # escreva a lista de pacotes
+novos.pacotes <- lista.de.pacotes[!(lista.de.pacotes %in%
+                                      installed.packages()[,"Package"])]
+if(length(novos.pacotes) > 0) {install.packages(novos.pacotes)}
+lapply(lista.de.pacotes, require, character.only=T)
+rm(lista.de.pacotes,novos.pacotes)
+gc()
+```
+
+## Exercitando o que sabemos até aqui
+
+- Carregue o arquivo `decisoes.rds`
+
+- Quais foram os 5 juízes com maior número de processos relacionados a drogas em Campinas ou Limeira?
+
+- Crie um objeto contendo o tempo médio entre decisão e por município
+
+- Salve o objeto resultante em um arquivo chamado `municipios.rds`
+
+## Resolução
+
+
+
+## Vamos versionar nossos projetos a partir de agora
+
+- Versionamento -> <https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/>
+
+## Exercitando o versionamento
+
+- Faça commit e push do script e do arquivo `.rds` 
+
+# tydyr
+
+
+
+# joins
