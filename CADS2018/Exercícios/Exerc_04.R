@@ -11,16 +11,29 @@ gc()
 
 # Carregue o arquivo `decisoes.rds` em um objeto chamado `decisoes`. ----
 
-
+decisoes <- read_rds("C:/Users/Aluno/Desktop/git/aulas_ENAP/CADS2018/Exercícios/dados/decisoes.rds")
 
 # Crie um objeto contendo o tempo médio entre decisão e registro por juiz, apenas para processos relacionados a drogas nos municípios de Campinas ou Limeira. ----
 ## Obs.: a nova "singularidade" da base de dados será o `juiz`. Na base original, a singularidade era o `processo`
 
-
+juizes_drogas_CL <- decisoes %>% 
+  # selecionando as colunas utilizadas (só pra usar o select)
+  select(juiz,municipio,txt_decisao,data_registro,data_decisao) %>%
+  # criando variável "droga" a partir do texto da decisão
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+                            "droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na"),
+          # variável tempo,
+         tempo = dmy(data_registro) - dmy(data_decisao)) %>% 
+  # filtrando municípios e processos sobre drogas
+  filter(droga ==TRUE,municipio %in% c("Campinas","Limeira")) %>%
+  group_by(juiz) %>%
+  summarise(tempo_medio = mean(tempo,na.rm=T))
 
 # Salve o objeto resultante em um arquivo chamado `juizes_drogas_CL.rds` ----
 
-
+write_rds(juizes_drogas_CL,
+          "C:/Users/Aluno/Desktop/git/aulas_ENAP/CADS2018/Exercícios/dados/juizes_drogas_CL.rds")
 
 # Faça commit e push do script e do arquivo `.rds` ----
 

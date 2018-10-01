@@ -19,6 +19,8 @@ lapply(lista.de.pacotes, require, character.only=T)
 rm(lista.de.pacotes,novos.pacotes)
 gc()
 
+
+
 knitr::opts_knit$set(root.dir = "/Volumes/Macintosh HD/OneDrive/ENAP/aulas_ENAP")
 
 ```
