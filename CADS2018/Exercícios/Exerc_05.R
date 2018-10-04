@@ -1,4 +1,5 @@
 # Exercícios aula 05
+#Nome: Ivan Ricardo Zimmermann
 lista.de.pacotes = c("tidyverse","lubridate","janitor","readxl","stringr","repmis") # escreva a lista de pacotes
 novos.pacotes <- lista.de.pacotes[!(lista.de.pacotes %in%
                                       installed.packages()[,"Package"])]
