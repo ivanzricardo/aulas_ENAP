@@ -22,6 +22,7 @@ juiz_mes <- decisoes %>%
   summarise(n=n()) %>%
   spread(mes,n,fill = 0)
 
+
 # Crie um objeto contendo informações sobre os tamanhos das bancadas dos ----
 # partidos (arquivo `bancadas.rds`), suas respectivas coligações 
 # eleitorais para 2018 (arquivo `coligacoes.xlsx`) e o 
