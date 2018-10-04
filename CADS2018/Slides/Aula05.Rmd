@@ -3,9 +3,9 @@ title: "Trabalhando com dados amostrais"
 author: "Frederico Bertholini"
 subtitle: Aula 05
 output:
+  beamer_presentation: default
   ioslides_presentation: 
     widescreen: yes
-  beamer_presentation: default
 ---
 
 
