@@ -1,0 +1,271 @@
+---
+title: "Trabalhando com dados amostrais"
+author: "Frederico Bertholini"
+subtitle: Aula 05
+output:
+  ioslides_presentation: 
+    widescreen: yes
+  beamer_presentation: default
+---
+
+
+```{r,eval=T,include=F}
+
+lista.de.pacotes = c("tidyverse","lubridate","janitor","readxl","stringr","repmis") # escreva a lista de pacotes
+novos.pacotes <- lista.de.pacotes[!(lista.de.pacotes %in%
+                                      installed.packages()[,"Package"])]
+if(length(novos.pacotes) > 0) {install.packages(novos.pacotes)}
+lapply(lista.de.pacotes, require, character.only=T)
+rm(lista.de.pacotes,novos.pacotes)
+gc()
+
+knitr::opts_knit$set(root.dir = "/Volumes/Macintosh HD/OneDrive/ENAP/aulas_ENAP")
+
+```
+
+
+
+```{r,eval=T,include=F}
+decisoes <- read_rds("CADS2018/Exercícios/dados/decisoes.rds")
+
+processos <- read_rds("CADS2018/Exercícios/dados/processos_nested.rds")
+
+```
+
+
+## Preparação para a aula
+
+- Baixe os dados da pasta exercícios (ou faça pull do GitHub)
+
+- Configure o GitHub na sua máquina 
+ -- Versionamento -> <https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/>
+ -- Instruções adicionais de instalação <http://r-bio.github.io/git-installation/>
+
+- Rode todos os pacotes (usando o macetinho) - baixe exercício 5
+
+- Repositório no GitHub <https://github.com/fredbsr/aulas_ENAP/tree/master/CADS2018>
+
+## Exercício
+
+- Qual juiz julga a maior proporção de processos que tratam de drogas
+
+ -- Dica: construa um `data.frame` contendo as colunas juiz, n_processos_drogas, n_processos_n_drogas e total_processos, remodelando os dados para haver um juiz por linha e utilizando `spread()`
+    
+## Resolução
+
+```{r,eval=F}
+decisoes %>% 
+  filter(!is.na(txt_decisao)) %>%
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+    "droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na"),
+    droga=case_when(
+      droga==TRUE ~ "droga",
+      droga==FALSE ~ "n_droga"
+    )) %>%
+  group_by(juiz,droga) %>%
+  summarise(n=n()) %>%
+  spread(droga,n,fill = 0) %>%
+  mutate(total=droga+n_droga,
+         proporcao=droga/total)
+  
+  
+```
+
+
+## Exercício
+
+- Qual quantidade mensal de de processos por juiz?
+
+    
+## Resolução
+
+```{r,eval=F}
+decisoes %>% 
+  filter(!is.na(txt_decisao)) %>%
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+    "droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na"),
+    droga=case_when(
+      droga==TRUE ~ "droga",
+      droga==FALSE ~ "n_droga"
+    )) %>%
+  group_by(juiz,droga) %>%
+  summarise(n=n()) %>%
+  spread(droga,n,fill = 0) %>%
+  mutate(total=droga+n_droga,
+         proporcao=droga/total)
+  
+  
+```
+
+
+## Resultado
+
+
+```{r,echo=F}
+decisoes %>% 
+  filter(!is.na(txt_decisao)) %>%
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+    "droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na"),
+    droga=case_when(
+      droga==TRUE ~ "droga",
+      droga==FALSE ~ "n_droga"
+    )) %>%
+  group_by(juiz,droga) %>%
+  summarise(n=n()) %>%
+  spread(droga,n,fill = 0) %>%
+  mutate(total=droga+n_droga,
+         proporcao=droga/total)
+  
+  
+```
+
+
+## Exemplo para o ggplot
+
+
+
+## Unindo e separando colunas
+
+- `unite` junta duas ou mais colunas usando algum separador (`_`, por exemplo).
+- `separate` faz o inverso de `unite`, e uma coluna em várias usando um separador.
+
+## Exemplo de separação de colunas
+
+- Olhe os valores da variável classe_assunto
+
+
+
+## Exemplo de separação de colunas
+
+- Vamos separar a coluna classe_assunto em duas colunas
+
+- coluna classe e coluna assunto
+
+- Existe separador? -> sim, `/`
+
+- Usei count apenas em assunto
+
+## Em ação
+```{r,eval=F}
+decisoes %>% 
+  select(n_processo, classe_assunto) %>% 
+  separate(classe_assunto, c('classe', 'assunto'), sep = ' / ', 
+           extra = 'merge', fill = 'right') %>% 
+  count(assunto, sort = TRUE)
+
+## count é um jeito resumido de usar group_by() %>% summarise(n())
+```
+
+## Em ação
+```{r,echo=F}
+decisoes %>% 
+  select(n_processo, classe_assunto) %>% 
+  separate(classe_assunto, c('classe', 'assunto'), sep = ' / ', 
+           extra = 'merge', fill = 'right') %>% 
+  count(assunto, sort = TRUE)
+
+
+```
+
+
+## List columns: `nest()` e `unnest()`
+
+`nest()` e `unnest()` são operações inversas e servem para tratar dados complexos, como o que temos em `processos`
+
+```{r}
+d_partes <- processos %>% 
+  select(n_processo, partes) %>% 
+  unnest(partes)
+```
+
+## 
+
+As list columns são uma forma condensada de guardar dados que estariam em múltiplas tabelas. Por exemplo, uma alternativa à colocar as `partes` numa list column seria guardar a tabela `d_partes` separadamente.
+
+```{r}
+
+glimpse(d_partes)
+```
+
+
+## Duplicatas
+
+Para retirar duplicatas, utilizar `distinct`. Ele considera apenas a primeira linha em que encontra um padrão para as combinações de variáveis escolhidas e descarta as demais.
+
+```{r echo=TRUE}
+decisoes %>% 
+  distinct(municipio)
+```
+
+## Por coluna
+
+Para manter as demais colunas, use `.keep_all=`:
+
+```{r echo=TRUE}
+decisoes %>%
+  distinct(municipio, camara, 
+           .keep_all = TRUE)
+```
+
+## `janitor::get_dupes()`
+
+Use `janitor::get_dupes()` para averiguar os casos em que há repetição de combinações de colunas.
+
+```{r echo=TRUE}
+decisoes %>% 
+  get_dupes(n_processo)
+```
+
+
+# Joins
+
+## Dados relacionais
+
+- Hadley Wickham <http://r4ds.had.co.nz/relational-data.html>
+
+## Principais funções 
+
+Para juntar tabelas, usar `inner_join`, `left_join`, `anti_join`, etc. 
+
+## Visualizando
+
+```{r, out.width="90%", echo=FALSE, fig.align='center',eval=F}
+knitr::include_graphics("CADS2018/Slides/imgs/join-venn.png")
+```
+
+
+
+## Exemplo de inner join:
+
+```{r echo=TRUE}
+decisoes %>% 
+  filter(data_registro == "18/01/2018", !is.na(id_decisao)) %>% 
+  select(id_decisao, n_processo) %>% 
+  inner_join(processos, "n_processo")
+```
+
+
+## Exemplo de right join:
+
+
+```{r echo=TRUE}
+decisoes %>% 
+  filter(data_registro == "18/01/2018", !is.na(id_decisao)) %>% 
+  select(id_decisao, n_processo) %>% 
+  right_join(processos, "n_processo")
+```
+
+## Exercício
+
+- Crie um objeto contendo informações sobre os tamanhos das bancadas dos partidos (arquivo `bancadas.rds`), suas respectivas coligações eleitorais para 2018 (arquivo `coligacoes.xlsx`) e o grau de concordância com a agenda do Gov Temer (arquivo `governismo_temer.xlsx`). 
+
+- Crie uma coluna sem excluir as originais
+
+- Bônus: use `group_by` e `summarise` para identificar qual candidato tem a coligação com menor média de concordância e qual candidato tem a coligação com maior soma da proporção total de assentos.
+
+# survyr
+
+## 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Estruturas de dados</title>
+  <title>Trabalhando com dados amostrais</title>
 
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -20,8 +20,8 @@
     var SLIDE_CONFIG = {
       // Slide settings
       settings: {
-                title: 'Estruturas de dados',
-                        subtitle: 'Aula 04',
+                title: 'Trabalhando com dados amostrais',
+                        subtitle: 'Aula 05',
                 useBuilds: true,
         usePrettify: true,
         enableSlideAreas: true,
@@ -97,164 +97,13 @@
           </hgroup>
   </slide>
 
-<slide class=""><hgroup><h2>Vamos versionar nossos projetos a partir de agora</h2></hgroup><article  id="vamos-versionar-nossos-projetos-a-partir-de-agora">
+<slide class=""><hgroup><h2>Preparação para a aula</h2></hgroup><article  id="preparacao-para-a-aula">
 
 <ul>
-<li><p>Versionamento -&gt; <a href='https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/' title=''>https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/</a></p></li>
-<li><p>Instruções adicionais de instalação <a href='http://r-bio.github.io/git-installation/' title=''>http://r-bio.github.io/git-installation/</a></p></li>
+<li><p>Baixe os dados da pasta exercícios (ou faça pull do GitHub)</p></li>
+<li><p>Configure o GitHub na sua máquina</p></li>
+<li><p>Rode todos os pacotes (usando o macetinho) - baixe exercício 5</p></li>
 </ul>
-
-</article></slide><slide class=""><hgroup><h2>Exercitando o que sabemos até aqui</h2></hgroup><article  id="exercitando-o-que-sabemos-ate-aqui">
-
-<ul>
-<li><p>Carregue o arquivo <code>decisoes.rds</code> em um objeto chamado <code>decisoes</code>.</p></li>
-<li><p>Crie um objeto contendo o tempo médio entre decisão e registro por juiz, apenas para processos relacionados a drogas nos municípios de Campinas ou Limeira.</p></li>
-</ul>
-
-<p>&#8211; Obs.: a nova &quot;singularidade&quot; da base de dados será o <code>juiz</code>. Na base original, a singularidade era o <code>processo</code></p>
-
-<ul>
-<li>Salve o objeto resultante em um arquivo chamado <code>juizes_drogas_CL.rds</code>.</li>
-</ul>
-
-</article></slide><slide class=""><hgroup><h2>Resolução</h2></hgroup><article  id="resolucao">
-
-<ul>
-<li>Carregando</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>#setwd()
-decisoes &lt;- read_rds(&quot;CADS2018/Exercícios/dados/decisoes.rds&quot;)</pre>
-
-</article></slide><slide class=""><hgroup><h2>Resolução</h2></hgroup><article  id="resolucao-1">
-
-<ul>
-<li>tempo médio entre decisão e registro, por juiz, para processos relacionados a drogas nos municípios de Campinas ou Limeira</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>juizes_drogas_CL &lt;- decisoes %&gt;% 
-  # selecionando as colunas utilizadas (só pra usar o select)
-  select(juiz,municipio,txt_decisao,data_registro,data_decisao) %&gt;%
-  # criando variável &quot;droga&quot; a partir do texto da decisão
-  mutate(txt_decisao = tolower(txt_decisao),
-         droga = str_detect(txt_decisao,
-    &quot;droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na&quot;),
-  # variável tempo, 
-         tempo = dmy(data_registro) - dmy(data_decisao)) %&gt;% 
-  filter(droga ==TRUE,municipio %in% c(&quot;Campinas&quot;,&quot;Limeira&quot;)) %&gt;%
-  group_by(juiz) %&gt;%
-  summarise(tempo_medio = mean(tempo,na.rm=T))</pre>
-
-</article></slide><slide class=""><hgroup><h2>Resolução</h2></hgroup><article  id="resolucao-2">
-
-<ul>
-<li>Salvando o objeto <code>juizes_drogas_CL.rds</code></li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>write_rds(juizes_drogas_CL,&quot;juizes_drogas_CL.rds&quot;)</pre>
-
-</article></slide><slide class=""><hgroup><h2>Exercitando o versionamento</h2></hgroup><article  id="exercitando-o-versionamento">
-
-<ul>
-<li>Faça commit e push do script e do arquivo <code>.rds</code></li>
-</ul>
-
-</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>tydyr</h2></hgroup><article  id="tydyr">
-
-</article></slide><slide class=""><hgroup><h2>Alterando o formato de dados</h2></hgroup><article  id="alterando-o-formato-de-dados">
-
-<p>Até agora, estudamos os principais ferramentas de transformação de dados do <code>dplyr</code>. Agora vamos aumentar nosso toolkit com <code>tidyr</code></p>
-
-<ul>
-<li>Vamos utilizar uma nova base de dados, que completa a de decisões.</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>processos &lt;- read_rds(&quot;CADS2018/Exercícios/dados/processos_nested.rds&quot;)</pre>
-
-</article></slide><slide class=""><hgroup><h2>Fomato tidy</h2></hgroup><article  id="fomato-tidy">
-
-<ul>
-<li>Hadley Wickham <a href='http://r4ds.had.co.nz/tidy-data.html' title=''>http://r4ds.had.co.nz/tidy-data.html</a></li>
-</ul>
-
-</article></slide><slide class=""><hgroup><h2>Funções do pacote</h2></hgroup><article  id="funcoes-do-pacote">
-
-<ul>
-<li><p>Enquanto o <code>dplyr</code> faz recortes na base (com <code>filter()</code>e <code>select()</code>) e adições simples (<code>mutate()</code>, <code>summarise()</code>), o <code>tidyr</code> mexe no <strong>formato</strong> da tabela (<code>gather()</code>, <code>spread()</code>) e faz modificações menos triviais.</p></li>
-<li>As funções do <code>tidyr</code> geralmente vêm em pares com seus inversos:
-
-<ul>
-<li><code>gather()</code> e <code>spread()</code>,</li>
-<li><code>nest()</code> e <code>unnest()</code>,</li>
-<li><code>separate()</code> e <code>unite()</code></li>
-</ul></li>
-</ul>
-
-</article></slide><slide class=""><hgroup><h2>Onde estamos</h2></hgroup><article  id="onde-estamos">
-
-<p><a href='http://r4ds.had.co.nz/wrangle-intro.html' title=''>http://r4ds.had.co.nz/wrangle-intro.html</a></p>
-
-</article></slide><slide class=""><hgroup><h2><code>gather()</code></h2></hgroup><article  id="gather">
-
-<ul>
-<li><code>gather()</code> empilha o banco de dados</li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
-  filter(!is.na(id_decisao)) %&gt;% 
-  select(id_decisao:data_registro) %&gt;% 
-  # 1. nome da coluna que vai guardar os nomes de colunas empilhadas
-  # 2. nome da coluna que vai guardar os valores das colunas
-  # 3. seleção das colunas a serem empilhadas
-  gather(key=&quot;variavel&quot;, value=&quot;valor&quot;, -id_decisao) %&gt;% 
-  arrange(id_decisao)</pre>
-
-<pre >## # A tibble: 69,996 x 3
-##    id_decisao variavel       valor                                        
-##    &lt;chr&gt;      &lt;chr&gt;          &lt;chr&gt;                                        
-##  1 11026431   n_processo     0000009-51.2015.8.26.0546                    
-##  2 11026431   classe_assunto Apelação / Tráfico de Drogas e Condutas Afins
-##  3 11026431   municipio      Itapira                                      
-##  4 11026431   camara         5ª Câmara de Direito Criminal                
-##  5 11026431   data_decisao   30/11/2017                                   
-##  6 11026431   data_registro  01/12/2017                                   
-##  7 11026432   n_processo     0002267-69.2013.8.26.0654                    
-##  8 11026432   classe_assunto Apelação / Furto Qualificado                 
-##  9 11026432   municipio      Vargem Grande Paulista                       
-## 10 11026432   camara         5ª Câmara de Direito Criminal                
-## # ... with 69,986 more rows</pre>
-
-</article></slide><slide class=""><hgroup><h2></h2></hgroup><article  id="section">
-
-</article></slide><slide class=""><hgroup><h2><code>spread()</code></h2></hgroup><article  id="spread">
-
-<ul>
-<li><p><code>spread()</code> espalha uma variável nas colunas e preenche com outra variável</p></li>
-<li><p>É essencialmente a função inversa de <code>gather</code></p></li>
-</ul>
-
-<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
-  filter(!is.na(id_decisao)) %&gt;% 
-  select(id_decisao:data_registro) %&gt;% 
-  gather(key, value, -id_decisao) %&gt;% 
-  # 1. coluna a ser espalhada
-  # 2. valores da coluna
-  spread(key, value)</pre>
-
-<pre >## # A tibble: 11,666 x 7
-##    id_decisao camara  classe_assunto  data_decisao data_registro municipio
-##    &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt;           &lt;chr&gt;        &lt;chr&gt;         &lt;chr&gt;    
-##  1 11026431   5ª Câm… Apelação / Trá… 30/11/2017   01/12/2017    Itapira  
-##  2 11026432   5ª Câm… Apelação / Fur… 30/11/2017   01/12/2017    Vargem G…
-##  3 11026433   5ª Câm… Apelação / Rou… 30/11/2017   01/12/2017    Sertãozi…
-##  4 11026434   12ª Câ… Agravo de Exec… 18/10/2017   01/12/2017    Ribeirão…
-##  5 11026435   15ª Câ… Apelação / Trá… 30/11/2017   01/12/2017    São Paulo
-##  6 11026442   5ª Câm… Apelação / Est… 30/11/2017   01/12/2017    Jales    
-##  7 11026445   13ª Câ… Apelação / Uso… 30/11/2017   01/12/2017    Santa Fé…
-##  8 11026453   5ª Câm… Apelação / Cri… 30/11/2017   01/12/2017    Franca   
-##  9 11026455   12ª Câ… Apelação / Rou… 05/07/2017   01/12/2017    Franca   
-## 10 11026456   12ª Câ… Apelação / Rou… 03/05/2017   01/12/2017    São José…
-## # ... with 11,656 more rows, and 1 more variable: n_processo &lt;chr&gt;</pre>
 
 </article></slide><slide class=""><hgroup><h2>Exercício</h2></hgroup><article  id="exercicio">
 
@@ -264,7 +113,24 @@ decisoes &lt;- read_rds(&quot;CADS2018/Exercícios/dados/decisoes.rds&quot;)</pr
 
 <p>&#8211; Dica: construa um <code>data.frame</code> contendo as colunas juiz, n_processos_drogas, n_processos_n_drogas e total_processos, remodelando os dados para haver um juiz por linha e utilizando <code>spread()</code></p>
 
-</article></slide><slide class=""><hgroup><h2>Resolução</h2></hgroup><article  id="resolucao-3">
+</article></slide><slide class=""><hgroup><h2>Resolução</h2></hgroup><article  id="resolucao">
+
+<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
+  filter(!is.na(txt_decisao)) %&gt;%
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+    &quot;droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na&quot;),
+    droga=case_when(
+      droga==TRUE ~ &quot;droga&quot;,
+      droga==FALSE ~ &quot;n_droga&quot;
+    )) %&gt;%
+  group_by(juiz,droga) %&gt;%
+  summarise(n=n()) %&gt;%
+  spread(droga,n,fill = 0) %&gt;%
+  mutate(total=droga+n_droga,
+         proporcao=droga/total)</pre>
+
+</article></slide><slide class=""><hgroup><h2>Resultado</h2></hgroup><article  id="resultado">
 
 <pre >## # A tibble: 65 x 5
 ## # Groups:   juiz [65]
@@ -280,7 +146,208 @@ decisoes &lt;- read_rds(&quot;CADS2018/Exercícios/dados/decisoes.rds&quot;)</pr
 ##  8 Bandeira Lins              0       2     2     0    
 ##  9 Camargo Aranha Filho      32     109   141     0.227
 ## 10 Camilo Léllis             32     133   165     0.194
-## # ... with 55 more rows</pre></article></slide>
+## # ... with 55 more rows</pre>
+
+</article></slide><slide class=""><hgroup><h2>Exemplo para o ggplot</h2></hgroup><article  id="exemplo-para-o-ggplot">
+
+</article></slide><slide class=""><hgroup><h2>Unindo e separando colunas</h2></hgroup><article  id="unindo-e-separando-colunas">
+
+<ul>
+<li><code>unite</code> junta duas ou mais colunas usando algum separador (<code>_</code>, por exemplo).</li>
+<li><code>separate</code> faz o inverso de <code>unite</code>, e uma coluna em várias usando um separador.</li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>Exemplo de separação de colunas</h2></hgroup><article  id="exemplo-de-separacao-de-colunas">
+
+<ul>
+<li><p>Vamos separar a coluna classe_assunto em duas colunas</p></li>
+<li><p>coluna classe e coluna assunto</p></li>
+<li><p>Existe separador? -&gt; sim, <code>/</code></p></li>
+<li><p>Usei count apenas em assunto</p></li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>Em ação</h2></hgroup><article  id="em-acao">
+
+<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
+  select(n_processo, classe_assunto) %&gt;% 
+  separate(classe_assunto, c(&#39;classe&#39;, &#39;assunto&#39;), sep = &#39; / &#39;, 
+           extra = &#39;merge&#39;, fill = &#39;right&#39;) %&gt;% 
+  count(assunto, sort = TRUE)</pre>
+
+</article></slide><slide class=""><hgroup><h2>Em ação</h2></hgroup><article  id="em-acao-1">
+
+<pre >## # A tibble: 152 x 2
+##    assunto                                n
+##    &lt;chr&gt;                              &lt;int&gt;
+##  1 Tráfico de Drogas e Condutas Afins  2441
+##  2 Pena Privativa de Liberdade         1106
+##  3 Roubo Majorado                      1093
+##  4 Furto Qualificado                    838
+##  5 Roubo                                780
+##  6 Progressão de Regime                 607
+##  7 Furto                                450
+##  8 Receptação                           353
+##  9 Homicídio Qualificado                329
+## 10 Crimes de Trânsito                   322
+## # ... with 142 more rows</pre>
+
+</article></slide><slide class=""><hgroup><h2>List columns: <code>nest()</code> e <code>unnest()</code></h2></hgroup><article  id="list-columns-nest-e-unnest">
+
+<p><code>nest()</code> e <code>unnest()</code> são operações inversas e servem para tratar dados complexos, como o que temos em <code>processos</code></p>
+
+<pre class = 'prettyprint lang-r'>d_partes &lt;- processos %&gt;% 
+  select(n_processo, partes) %&gt;% 
+  unnest(partes)</pre>
+
+</article></slide><slide class=""><hgroup><h2></h2></hgroup><article  id="section">
+
+<p>As list columns são uma forma condensada de guardar dados que estariam em múltiplas tabelas. Por exemplo, uma alternativa à colocar as <code>partes</code> numa list column seria guardar a tabela <code>d_partes</code> separadamente.</p>
+
+<pre class = 'prettyprint lang-r'>glimpse(d_partes)</pre>
+
+<pre >## Observations: 37,579
+## Variables: 5
+## $ n_processo &lt;chr&gt; &quot;0000003-71.2016.8.26.0073&quot;, &quot;0000003-71.2016.8.26....
+## $ id         &lt;int&gt; 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, ...
+## $ name       &lt;chr&gt; &quot;JOSE MARIA JUSTINO NETO&quot;, &quot;Defensoria Pública do E...
+## $ part       &lt;chr&gt; &quot;Apelante&quot;, &quot;Apelante&quot;, &quot;Apelado&quot;, &quot;Apelante&quot;, &quot;Ape...
+## $ role       &lt;chr&gt; &quot;Apelante&quot;, &quot;Apelante&quot;, &quot;Apelado&quot;, &quot;Apelante&quot;, &quot;Adv...</pre>
+
+</article></slide><slide class=""><hgroup><h2>Duplicatas</h2></hgroup><article  id="duplicatas">
+
+<p>Para retirar duplicatas, utilizar <code>distinct</code>. Ele considera apenas a primeira linha em que encontra um padrão para as combinações de variáveis escolhidas e descarta as demais.</p>
+
+<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
+  distinct(municipio)</pre>
+
+<pre >## # A tibble: 315 x 1
+##    municipio          
+##    &lt;chr&gt;              
+##  1 Cosmópolis         
+##  2 São Paulo          
+##  3 Ribeirão Preto     
+##  4 Araçatuba          
+##  5 Presidente Prudente
+##  6 Bertioga           
+##  7 Taubaté            
+##  8 Aparecida          
+##  9 Jandira            
+## 10 Flórida Paulista   
+## # ... with 305 more rows</pre>
+
+</article></slide><slide class=""><hgroup><h2>Por coluna</h2></hgroup><article  id="por-coluna">
+
+<p>Para manter as demais colunas, use <code>.keep_all=</code>:</p>
+
+<pre class = 'prettyprint lang-r'>decisoes %&gt;%
+  distinct(municipio, camara, 
+           .keep_all = TRUE)</pre>
+
+<pre >## # A tibble: 2,760 x 9
+##    id_decisao n_processo  classe_assunto    municipio camara  data_decisao
+##    &lt;chr&gt;      &lt;chr&gt;       &lt;chr&gt;             &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;       
+##  1 11094999   0057003-20… Habeas Corpus / … Cosmópol… 3ª Câm… 19/12/2017  
+##  2 11093733   0052762-03… Habeas Corpus / … São Paulo 3ª Câm… 19/12/2017  
+##  3 11093677   0055169-79… Habeas Corpus / … Ribeirão… 3ª Câm… 19/12/2017  
+##  4 11093270   9000580-82… Agravo de Execuç… Araçatuba 8ª Câm… 14/12/2017  
+##  5 11093374   0052938-79… Mandado de Segur… São Paulo 8ª Câm… 14/12/2017  
+##  6 11093320   9000723-79… Agravo de Execuç… Presiden… 8ª Câm… 14/12/2017  
+##  7 11091506   0003276-86… Apelação / Tráfi… Bertioga  8ª Câm… 14/12/2017  
+##  8 11093326   9000298-11… Agravo de Execuç… Taubaté   8ª Câm… 14/12/2017  
+##  9 11092475   0004653-39… Apelação / Tráfi… Aparecida 8ª Câm… 14/12/2017  
+## 10 11093773   2221930-66… Habeas Corpus / … Jandira   3ª Câm… 19/12/2017  
+## # ... with 2,750 more rows, and 3 more variables: data_registro &lt;chr&gt;,
+## #   juiz &lt;chr&gt;, txt_decisao &lt;chr&gt;</pre>
+
+</article></slide><slide class=""><hgroup><h2><code>janitor::get_dupes()</code></h2></hgroup><article  id="janitorget_dupes">
+
+<p>Use <code>janitor::get_dupes()</code> para averiguar os casos em que há repetição de combinações de colunas.</p>
+
+<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
+  get_dupes(n_processo)</pre>
+
+<pre >## # A tibble: 114 x 10
+##    n_processo   dupe_count id_decisao classe_assunto     municipio camara 
+##    &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;              &lt;chr&gt;     &lt;chr&gt;  
+##  1 0000276-86.…          2 11051087   Apelação / Tráfic… Itaporan… 2ª Câm…
+##  2 0000276-86.…          2 11093633   Embargos de Decla… Itaporan… 2ª Câm…
+##  3 0000358-10.…          2 11108278   Embargos de Decla… São Paulo 2ª Câm…
+##  4 0000358-10.…          2 11028129   Apelação / Roubo … São Paulo 2ª Câm…
+##  5 0002236-18.…          2 11041351   Apelação / Contra… Nhandeara 1ª Câm…
+##  6 0002236-18.…          2 11041352   Apelação / Contra… Nhandeara 1ª Câm…
+##  7 0004453-20.…          2 11041132   Apelação / Tráfic… São Paulo 2ª Câm…
+##  8 0004453-20.…          2 11093635   Embargos de Decla… São Paulo 2ª Câm…
+##  9 0004636-51.…          3 11032094   Apelação / Tráfic… Olímpia   2ª Câm…
+## 10 0004636-51.…          3 11032093   Apelação / Tráfic… Olímpia   2ª Câm…
+## # ... with 104 more rows, and 4 more variables: data_decisao &lt;chr&gt;,
+## #   data_registro &lt;chr&gt;, juiz &lt;chr&gt;, txt_decisao &lt;chr&gt;</pre>
+
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Joins</h2></hgroup><article  id="joins">
+
+</article></slide><slide class=""><hgroup><h2>Dados relacionais</h2></hgroup><article  id="dados-relacionais">
+
+<ul>
+<li>Hadley Wickham <a href='http://r4ds.had.co.nz/relational-data.html' title=''>http://r4ds.had.co.nz/relational-data.html</a></li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>Principais funções</h2></hgroup><article  id="principais-funcoes">
+
+<p>Para juntar tabelas, usar <code>inner_join</code>, <code>left_join</code>, <code>anti_join</code>, etc.</p>
+
+</article></slide><slide class=""><hgroup><h2>Visualizando</h2></hgroup><article  id="visualizando">
+
+</article></slide><slide class=""><hgroup><h2>Exemplo de inner join:</h2></hgroup><article  id="exemplo-de-inner-join">
+
+<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
+  filter(data_registro == &quot;18/01/2018&quot;, !is.na(id_decisao)) %&gt;% 
+  select(id_decisao, n_processo) %&gt;% 
+  inner_join(processos, &quot;n_processo&quot;)</pre>
+
+<pre >## # A tibble: 169 x 5
+##    id_decisao n_processo                infos             partes   results
+##    &lt;chr&gt;      &lt;chr&gt;                     &lt;list&gt;            &lt;list&gt;   &lt;list&gt; 
+##  1 11109089   0003779-93.2015.8.26.0597 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  2 11109088   3001293-25.2013.8.26.0510 &lt;tibble [13 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  3 11108246   0063566-45.2015.8.26.0050 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  4 11108245   0003528-84.2015.8.26.0400 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  5 11109087   0008470-76.2015.8.26.0072 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  6 11109086   0013767-62.2012.8.26.0624 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  7 11109085   3019561-54.2013.8.26.0405 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  8 11108348   0003072-91.2017.8.26.0521 &lt;tibble [11 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  9 11108725   0009578-41.2017.8.26.0050 &lt;tibble [12 × 2]&gt; &lt;tibble… &lt;tibbl…
+## 10 11108347   3001116-52.2013.8.26.0028 &lt;tibble [12 × 2]&gt; &lt;tibble… &lt;tibbl…
+## # ... with 159 more rows</pre>
+
+</article></slide><slide class=""><hgroup><h2>Exemplo de right join:</h2></hgroup><article  id="exemplo-de-right-join">
+
+<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
+  filter(data_registro == &quot;18/01/2018&quot;, !is.na(id_decisao)) %&gt;% 
+  select(id_decisao, n_processo) %&gt;% 
+  right_join(processos, &quot;n_processo&quot;)</pre>
+
+<pre >## # A tibble: 11,638 x 5
+##    id_decisao n_processo                infos             partes   results
+##    &lt;chr&gt;      &lt;chr&gt;                     &lt;list&gt;            &lt;list&gt;   &lt;list&gt; 
+##  1 &lt;NA&gt;       0000003-71.2016.8.26.0073 &lt;tibble [11 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  2 &lt;NA&gt;       0000004-09.2017.8.26.0142 &lt;tibble [12 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  3 &lt;NA&gt;       0000004-34.2016.8.26.0630 &lt;tibble [12 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  4 &lt;NA&gt;       0000004-59.2015.8.26.0633 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  5 &lt;NA&gt;       0000004-62.2014.8.26.0611 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  6 &lt;NA&gt;       0000006-04.2017.8.26.0651 &lt;tibble [12 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  7 &lt;NA&gt;       0000006-06.2015.8.26.0576 &lt;tibble [12 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  8 &lt;NA&gt;       0000006-63.2017.8.26.0599 &lt;tibble [12 × 2]&gt; &lt;tibble… &lt;tibbl…
+##  9 &lt;NA&gt;       0000006-74.2010.8.26.0125 &lt;tibble [14 × 2]&gt; &lt;tibble… &lt;tibbl…
+## 10 &lt;NA&gt;       0000006-82.2016.8.26.0604 &lt;tibble [11 × 2]&gt; &lt;tibble… &lt;tibbl…
+## # ... with 11,628 more rows</pre>
+
+</article></slide><slide class=""><hgroup><h2>Exercício</h2></hgroup><article  id="exercicio-1">
+
+<ul>
+<li><p>Crie um objeto contendo informações sobre os tamanhos das bancadas dos partidos (arquivo <code>bancadas.rds</code>), suas respectivas coligações eleitorais para 2018 (arquivo <code>coligacoes.xlsx</code>) e o grau de concordância com a agenda do Gov Temer (arquivo <code>governismo_temer.xlsx</code>).</p></li>
+<li><p>Bônus: use <code>group_by</code> e <code>summarise</code> para identificar qual candidato tem a coligação com menor média de concordância e qual candidato tem a coligação com maior soma da proporção total de assentos.</p></li>
+</ul>
+
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>survyr</h2></hgroup><article  id="survyr"></article></slide>
 
 
   <slide class="backdrop"></slide>

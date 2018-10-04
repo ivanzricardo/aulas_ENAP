@@ -3,9 +3,9 @@ title: "Estruturas de dados"
 author: "Frederico Bertholini"
 subtitle: Aula 04
 output:
-  beamer_presentation: default
   ioslides_presentation: 
     widescreen: yes
+  beamer_presentation: default
 ---
 
 
@@ -30,6 +30,7 @@ knitr::opts_knit$set(root.dir = "/Volumes/Macintosh HD/OneDrive/ENAP/aulas_ENAP"
 
 - Versionamento -> <https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/>
 
+- Instruções adicionais de instalação <http://r-bio.github.io/git-installation/>
 
 ## Exercitando o que sabemos até aqui
 
@@ -139,7 +140,7 @@ decisoes %>%
   arrange(id_decisao)
 ```
 
-
+## 
 
 ## `spread()`
 
@@ -162,7 +163,7 @@ decisoes %>%
 
 - Qual juiz julga a maior proporção de processos que tratam de drogas
 
- -- Dica: construa um `data.frame` contendo as colunas juiz, n_processos_drogas, n_processos_n_drogas e total_processos, remodelando os dados para haver um juiz por linha e utilizando `spead()`
+ -- Dica: construa um `data.frame` contendo as colunas juiz, n_processos_drogas, n_processos_n_drogas e total_processos, remodelando os dados para haver um juiz por linha e utilizando `spread()`
     
 ## Resolução
 
@@ -185,112 +186,3 @@ decisoes %>%
   
 ```
 
-
-## Unindo e separando colunas
-
-- `unite` junta duas ou mais colunas usando algum separador (`_`, por exemplo).
-- `separate` faz o inverso de `unite`, e uma coluna em várias usando um separador.
-
-## 
-```{r}
-decisoes %>% 
-  select(n_processo, classe_assunto) %>% 
-  separate(classe_assunto, c('classe', 'assunto'), sep = ' / ', 
-           extra = 'merge', fill = 'right') %>% 
-  count(assunto, sort = TRUE)
-```
-
-
-
-## List columns: `nest()` e `unnest()`
-
-`nest()` e `unnest()` são operações inversas e servem para tratar dados complexos, como o que temos em `processos`
-
-```{r}
-d_partes <- processos %>% 
-  select(n_processo, partes) %>% 
-  unnest(partes)
-```
-
-## 
-
-As list columns são uma forma condensada de guardar dados que estariam em múltiplas tabelas. Por exemplo, uma alternativa à colocar as `partes` numa list column seria guardar a tabela `d_partes` separadamente.
-
-```{r}
-
-glimpse(d_partes)
-```
-
-
-## Duplicatas
-
-Para retirar duplicatas, utilizar `distinct`. Ele considera apenas a primeira linha em que encontra um padrão para as combinações de variáveis escolhidas e descarta as demais.
-
-```{r echo=TRUE}
-decisoes %>% 
-  distinct(municipio)
-```
-
-## Por coluna
-
-Para manter as demais colunas, use `.keep_all=`:
-
-```{r echo=TRUE}
-decisoes %>%
-  distinct(municipio, camara, 
-           .keep_all = TRUE)
-```
-
-## `janitor::get_dupes()`
-
-Use `janitor::get_dupes()` para averiguar os casos em que há repetição de combinações de colunas.
-
-```{r echo=TRUE}
-decisoes %>% 
-  get_dupes(n_processo)
-```
-
-
-# Joins
-
-## Dados relacionais
-
-- Hadley Wickham <http://r4ds.had.co.nz/relational-data.html>
-
-## Principais funções 
-
-Para juntar tabelas, usar `inner_join`, `left_join`, `anti_join`, etc. 
-
-## Visualizando
-
-```{r, out.width="90%", echo=FALSE, fig.align='center',eval=F}
-knitr::include_graphics("CADS2018/Slides/imgs/join-venn.png")
-```
-
-
-
-## Exemplo de inner join:
-
-```{r echo=TRUE}
-decisoes %>% 
-  filter(data_registro == "18/01/2018", !is.na(id_decisao)) %>% 
-  select(id_decisao, n_processo) %>% 
-  inner_join(processos, "n_processo")
-```
-
-
-## Exemplo de right join:
-
-
-```{r echo=TRUE}
-decisoes %>% 
-  filter(data_registro == "18/01/2018", !is.na(id_decisao)) %>% 
-  select(id_decisao, n_processo) %>% 
-  right_join(processos, "n_processo")
-```
-
-## Exercício
-
-- Crie um objeto contendo informações sobre os tamanhos das bancadas dos partidos (arquivo `bancadas.rds`), suas respectivas coligações eleitorais para 2018 (arquivo `coligacoes.xlsx`) e o grau de concordância com a agenda do Gov Temer (arquivo `governismo_temer.xlsx`). 
-
-- Bônus: use `group_by` e `summarise` para identificar qual candidato tem a coligação com menor média de concordância e qual candidato tem a maior proporção total de assentos.
