@@ -101,8 +101,9 @@
 
 <ul>
 <li><p>Baixe os dados da pasta exercícios (ou faça pull do GitHub)</p></li>
-<li><p>Configure o GitHub na sua máquina</p></li>
+<li><p>Configure o GitHub na sua máquina &#8211; Versionamento -&gt; <a href='https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/' title=''>https://www.curso-r.com/blog/2017-07-17-rstudio-e-github/</a> &#8211; Instruções adicionais de instalação <a href='http://r-bio.github.io/git-installation/' title=''>http://r-bio.github.io/git-installation/</a></p></li>
 <li><p>Rode todos os pacotes (usando o macetinho) - baixe exercício 5</p></li>
+<li><p>Repositório no GitHub <a href='https://github.com/fredbsr/aulas_ENAP/tree/master/CADS2018' title=''>https://github.com/fredbsr/aulas_ENAP/tree/master/CADS2018</a></p></li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>Exercício</h2></hgroup><article  id="exercicio">
@@ -114,6 +115,29 @@
 <p>&#8211; Dica: construa um <code>data.frame</code> contendo as colunas juiz, n_processos_drogas, n_processos_n_drogas e total_processos, remodelando os dados para haver um juiz por linha e utilizando <code>spread()</code></p>
 
 </article></slide><slide class=""><hgroup><h2>Resolução</h2></hgroup><article  id="resolucao">
+
+<pre class = 'prettyprint lang-r'>decisoes %&gt;% 
+  filter(!is.na(txt_decisao)) %&gt;%
+  mutate(txt_decisao = tolower(txt_decisao),
+         droga = str_detect(txt_decisao,
+    &quot;droga|entorpecente|psicotr[óo]pico|maconha|haxixe|coca[íi]na&quot;),
+    droga=case_when(
+      droga==TRUE ~ &quot;droga&quot;,
+      droga==FALSE ~ &quot;n_droga&quot;
+    )) %&gt;%
+  group_by(juiz,droga) %&gt;%
+  summarise(n=n()) %&gt;%
+  spread(droga,n,fill = 0) %&gt;%
+  mutate(total=droga+n_droga,
+         proporcao=droga/total)</pre>
+
+</article></slide><slide class=""><hgroup><h2>Exercício</h2></hgroup><article  id="exercicio-1">
+
+<ul>
+<li>Qual quantidade mensal de de processos por juiz?</li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>Resolução</h2></hgroup><article  id="resolucao-1">
 
 <pre class = 'prettyprint lang-r'>decisoes %&gt;% 
   filter(!is.na(txt_decisao)) %&gt;%
@@ -160,6 +184,12 @@
 </article></slide><slide class=""><hgroup><h2>Exemplo de separação de colunas</h2></hgroup><article  id="exemplo-de-separacao-de-colunas">
 
 <ul>
+<li>Olhe os valores da variável classe_assunto</li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>Exemplo de separação de colunas</h2></hgroup><article  id="exemplo-de-separacao-de-colunas-1">
+
+<ul>
 <li><p>Vamos separar a coluna classe_assunto em duas colunas</p></li>
 <li><p>coluna classe e coluna assunto</p></li>
 <li><p>Existe separador? -&gt; sim, <code>/</code></p></li>
@@ -172,7 +202,9 @@
   select(n_processo, classe_assunto) %&gt;% 
   separate(classe_assunto, c(&#39;classe&#39;, &#39;assunto&#39;), sep = &#39; / &#39;, 
            extra = &#39;merge&#39;, fill = &#39;right&#39;) %&gt;% 
-  count(assunto, sort = TRUE)</pre>
+  count(assunto, sort = TRUE)
+
+## count é um jeito resumido de usar group_by() %&gt;% summarise(n())</pre>
 
 </article></slide><slide class=""><hgroup><h2>Em ação</h2></hgroup><article  id="em-acao-1">
 
@@ -340,14 +372,17 @@
 ## 10 &lt;NA&gt;       0000006-82.2016.8.26.0604 &lt;tibble [11 × 2]&gt; &lt;tibble… &lt;tibbl…
 ## # ... with 11,628 more rows</pre>
 
-</article></slide><slide class=""><hgroup><h2>Exercício</h2></hgroup><article  id="exercicio-1">
+</article></slide><slide class=""><hgroup><h2>Exercício</h2></hgroup><article  id="exercicio-2">
 
 <ul>
 <li><p>Crie um objeto contendo informações sobre os tamanhos das bancadas dos partidos (arquivo <code>bancadas.rds</code>), suas respectivas coligações eleitorais para 2018 (arquivo <code>coligacoes.xlsx</code>) e o grau de concordância com a agenda do Gov Temer (arquivo <code>governismo_temer.xlsx</code>).</p></li>
+<li><p>Crie uma coluna sem excluir as originais</p></li>
 <li><p>Bônus: use <code>group_by</code> e <code>summarise</code> para identificar qual candidato tem a coligação com menor média de concordância e qual candidato tem a coligação com maior soma da proporção total de assentos.</p></li>
 </ul>
 
-</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>survyr</h2></hgroup><article  id="survyr"></article></slide>
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>survyr</h2></hgroup><article  id="survyr">
+
+</article></slide><slide class=""><hgroup><h2></h2></hgroup><article  id="section-1"></article></slide>
 
 
   <slide class="backdrop"></slide>
