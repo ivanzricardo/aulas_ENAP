@@ -75,8 +75,9 @@ decisoes %>%
 
 ## Exercício
 
-- Qual quantidade mensal de de processos por juiz?
+- Qual quantidade mensal de decisões por juiz?
 
+- Dica: use `data_decisao` `dmy()` e `month()`
     
 ## Resolução
 

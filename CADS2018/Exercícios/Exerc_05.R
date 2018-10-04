@@ -13,7 +13,14 @@ gc()
 
 decisoes <- read_rds("C:/Users/Aluno/Desktop/git/aulas_ENAP/CADS2018/Exercícios/dados/decisoes.rds")
 
-# Qual quantidade mensal de de processos por juiz?
+# Qual quantidade mensal de decisões por juiz?
+
+juiz_mes <- decisoes %>% 
+  mutate(mes = month(dmy(data_decisao))) %>%
+  filter(!is.na(mes)) %>%
+  group_by(juiz,mes) %>%
+  summarise(n=n()) %>%
+  spread(mes,n,fill = 0)
 
 # Crie um objeto contendo informações sobre os tamanhos das bancadas dos ----
 # partidos (arquivo `bancadas.rds`), suas respectivas coligações 
