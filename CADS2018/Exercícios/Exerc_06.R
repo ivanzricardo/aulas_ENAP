@@ -59,3 +59,6 @@ bancadas_coligacoes_governismo <- bancadas %>%
 # Bônus: use `group_by` e `summarise` para identificar qual candidato tem a ----
 # coligação com menor média de concordância e qual candidato 
 # tem a maior proporção total de assentos.
+
+bancadas2 <- bancadas_coligacoes_governismo %>%
+  unite(P_P,president,partypresid,,sep=" - ",remove=F)
