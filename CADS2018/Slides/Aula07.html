@@ -141,13 +141,6 @@
 
 <p>Pronto, agora trabalhe como se estivesse em um <em>tibble</em> <code>tbl_df</code> normal, que será um <code>tbl_svy</code></p>
 
-</article></slide><slide class=""><hgroup><h2>PNAD</h2></hgroup><article  id="pnad">
-
-<ul>
-<li><p>PNADcIBGE <a href='https://rpubs.com/BragaDouglas/335574' title=''>https://rpubs.com/BragaDouglas/335574</a></p></li>
-<li><p>ADSFree <a href='http://asdfree.com/pesquisa-nacional-por-amostra-de-domicilios-continua-pnadc.html' title=''>http://asdfree.com/pesquisa-nacional-por-amostra-de-domicilios-continua-pnadc.html</a></p></li>
-</ul>
-
 </article></slide><slide class=""><hgroup><h2>Este não é um curso de amostragem</h2></hgroup><article  id="este-nao-e-um-curso-de-amostragem">
 
 <ul>
@@ -199,16 +192,25 @@
 <ul>
 <li><p><code>survey_total</code></p></li>
 <li><p><code>survey_mean</code></p></li>
+<li><p><code>survey_median()</code></p></li>
+<li><p><code>survey_ratio()</code></p></li>
+<li><p><code>survey_quantile()</code></p></li>
+<li><p>Vamos ao live code</p></li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Exemplos</h2></hgroup><article  id="exemplos">
+</article></slide><slide class=""><hgroup><h2>PNAD</h2></hgroup><article  id="pnad">
+
+<ul>
+<li><p>PNADcIBGE <a href='https://rpubs.com/BragaDouglas/335574' title=''>https://rpubs.com/BragaDouglas/335574</a></p></li>
+<li><p>ADSFree <a href='http://asdfree.com/pesquisa-nacional-por-amostra-de-domicilios-continua-pnadc.html' title=''>http://asdfree.com/pesquisa-nacional-por-amostra-de-domicilios-continua-pnadc.html</a></p></li>
+</ul>
 
 </article></slide><slide class=""><hgroup><h2>Exercício</h2></hgroup><article  id="exercicio">
 
 <ul>
 <li><p>Carregue os dados de exemplo do pacote survey <code>data(api)</code></p></li>
-<li><p>usando</p></li>
-<li><p>tente construir um gráfico</p></li>
+<li><p>Qual a proporção de escolas por tipo? (use a variável <code>stype</code>)</p></li>
+<li><p>Quantas escolas há por tipo? (use a variável <code>stype</code>)</p></li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>Resolução</h2></hgroup><article  id="resolucao">
@@ -248,15 +250,19 @@
 </article></slide><slide class=""><hgroup><h2>Recursos</h2></hgroup><article  id="recursos">
 
 <ul>
-<li><p>R Graph Gallery <a href='https://www.r-graph-gallery.com/' title=''>https://www.r-graph-gallery.com/</a></p></li>
 <li><p>STHDA <a href='http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization' title=''>http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization</a></p></li>
+<li><p>R Graph Gallery <a href='https://www.r-graph-gallery.com/' title=''>https://www.r-graph-gallery.com/</a></p></li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>O básico</h2></hgroup><article  id="o-basico">
 
 <ul>
 <li><p>Geometrias</p></li>
-<li><p>Escalas</p></li>
+<li><p>Estéticas</p></li>
+<li><p>Escalas (estética)</p></li>
+<li><p>Escalas (eixos)</p></li>
+<li><p>Temas</p></li>
+<li><p>Facet</p></li>
 </ul></article></slide>
 
 
