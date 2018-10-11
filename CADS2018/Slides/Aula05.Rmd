@@ -263,10 +263,17 @@ decisoes %>%
 
 - Crie um objeto contendo informações sobre os tamanhos das bancadas dos partidos (arquivo `bancadas.rds`), suas respectivas coligações eleitorais para 2018 (arquivo `coligacoes.xlsx`) e o grau de concordância com a agenda do Gov Temer (arquivo `governismo_temer.xlsx`). 
 
-- Crie uma coluna sem excluir as originais
+- Crie uma coluna unindo partido e candidato, sem excluir as originais
 
 - Bônus: use `group_by` e `summarise` para identificar qual candidato tem a coligação com menor média de concordância e qual candidato tem a coligação com maior soma da proporção total de assentos.
 
 # survyr
 
-## 
+## Referências
+
+- Survey <http://r-survey.r-forge.r-project.org/survey/>
+
+- `srvyr` <https://cran.r-project.org/web/packages/srvyr/vignettes/srvyr-vs-survey.html>
+
+##
+

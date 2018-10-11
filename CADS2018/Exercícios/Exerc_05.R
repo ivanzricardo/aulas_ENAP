@@ -12,7 +12,10 @@ gc()
 
 # Carregue o arquivo `decisoes.rds` em um objeto chamado `decisoes`. ----
 
+
 decisoes <- read_rds("C:/Users/aluno.ENAP/Desktop/decisoes.rds")
+decisoes <- read_rds("~/git/aulas_ENAP/CADS2018/Exercícios/dados/decisoes.rds/decisoes.rds")
+
 
 # Qual quantidade mensal de decisões por juiz?
 
